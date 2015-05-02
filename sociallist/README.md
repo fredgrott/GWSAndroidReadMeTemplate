@@ -6,7 +6,7 @@
 
 ## CVs
 
-[![LinkedIN](../art/linkedin80x80.png)](http://www.linkedin.com/in/shareme/en)![Xing](../art/xing80x80.png)
+[![LinkedIN](../art/linkedin80x80.png)](http://www.linkedin.com/in/shareme/en)[![Xing](../art/xing80x80.png)](https://www.xing.com/profile/Fred_Grott?sc_o=mxb_p)
 
 ## GWS Website
 
