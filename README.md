@@ -1,12 +1,24 @@
 # GWSAndroidReadMeTemplate
+![ReadMe Template cartoon](/art/readmetemplatecartoon.png)
 
 **image here, project logo screen shot or gif**
 
-**talk in sound bites to both tech and non-tech audiences**
+
+**talk in sound bites to both tech and non-tech audiences, STORY FIRST than allegories, sentence fragments preferred sentences only 12 words long**
 
 **description and purpose of project here**
 
-Simple android readme template for all my android projects with style notes, etc.
+I was reading someone dissect ad-copy of the Apple iPhone...
+
+And it occurred to me that to reach the non-tech audiences I have to Converse Different..
+
+Want the power that comes with more people reading your readme?
+
+Fork, this repo and re-use my template..
+
+
+
+
 
 [GWSAndroidReadMeTemplate Repo](https://github.com/shareme/GWSAndroidReadMeTemplate)
 
@@ -14,8 +26,9 @@ Simple android readme template for all my android projects with style notes, etc
 
 **Sound bite to two audiences tech and non-tech about the implementation**
 
-Most people scan, so readme is reorganized to provide a cleaner layout with some discrete style changes to market in a more effective manner. For example, the content
-style is to talk in sound bites to both the non-tech and teach audiences.
+In our information age, people scan...
+
+
 
 # API Target Levels
 
@@ -77,19 +90,29 @@ Helpful resources for both the beginner and intermediate android developer.
 
 
 
-
 # About Fred Grott(GWS)
 
 ![GWS Logo](/art/gws_logo_longform_final.png)
 
 **describe Fred Grott dev/design processes and GWS**
 
-I am a Freelance Android UX Java Application Engineer Expert who focuses on both consumer and enterprise mobile applications. I believe in implementing an agile design and development environment breaking down the communication and heavy executive barriers through effective application of remote working, communication tools, and agile processes which results in a more user desire-able and friendly mobile application. At its core, my agile processes are composed of change, commitment, leadership, passion, and a company culture of  awesome missions.
+I do not color within the lines..it is more fun when you bend and break the rules..
 
-I excel at building consumer mobile application products because I am heavily involved in building mobile application products for my own start-up under the WeFit platform name. Given that I have to evolve the product from something that barely gets a
-relationship with a mobile device user to something that the mobile user cannot live without would it not make sense to have that developer develop your start-up product than a development or design shop with no passion for start-up products(most developer and design shops do not make mobile application products for their own start-up)?
+I make pixel perfect on multiple android device screen sizes look easy...
 
-Obviously, with owning my own design and development firm I do not outsource my sales process to recruiters. To contact me for 1099 design and development services you can use my email address in my [GitHub Profile](https://github.com/shareme).
+I am that rare unicorn, the developer and designer that creates from zero..start-ups tend to like that..
+
+To win the android platform takes...
+
+That obsessed, crazy person that obsesses about android..
+
+Show me an iphone and android developer I will show that they ignore android
+at your company's peril..
+
+
+
+
+[GitHub Profile](https://github.com/shareme)
 
 [GWS Website](http://shareme.github.io/FredGrott)
 
