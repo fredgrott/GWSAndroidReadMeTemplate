@@ -16,7 +16,9 @@ Want the power that comes with more people reading your readme?
 
 Fork, this repo and re-use my template..
 
+## Aims
 
+## Benefits
 
 
 
@@ -96,21 +98,25 @@ Helpful resources for both the beginner and intermediate android developer.
 
 **describe Fred Grott dev/design processes and GWS**
 
-I do not color within the lines..it is more fun when you bend and break the rules..
+I choose to develop those mobile applications that through iteration, user interface
+and application workflow changes, code development and refactoring, and user testing and user analytics can be transformed from the static idea your start-up had into
+a desirable thing in user's lives.
 
-I make pixel perfect on multiple android device screen sizes look easy...
+Our processes involve not only the fast agile android java code development but also
+the aspect of discovering the intersection of user demand for a problem to be solved and the prototype android application that may solve that problem. Okay, let me explain.
 
-I am that rare unicorn, the developer and designer that creates from zero..start-ups tend to like that..
+On desktop and laptop, web services and applications deal with a FUTURE INTENT to
+do something in a physical activity. On tablets, watches, car dashes, and phones
+we are dealing with a IMMEDIATE INTENT to do something in a physical activity. I can spot those mobile applications that were designed by web developers as they never
+connect the idea of transforming the data in the context of the immediate intent and activity. The other aspect of mobile is that since we have very tiny screen, we have to transform the workflow of the application into something that integrates with the immediate intent and activity.
 
-To win the android platform takes...
+For example, my WeEat android application that is in development takes a some fragmented data(nutritional information on menu items of fast food restuarants) and couples that with dietary parameters and calculations to produce an healthy food eating application that helps all overworked Americans keep on their diet while eating at fast fodo restaurants. Remember, all those nutritional menu item tables were designed for desktop as a static application of sorts. If we transform the data and integrate it into a different application workflow than we can get a mobile application POTENTIAL PRODUCT.
 
-That obsessed, crazy person that obsesses about android..
+Part of the mobile application product solution is also addressing climbing or increasing consumer trends rather than decreasing trends. For example, I could have
+chosen to do a kitchen recipe application that would inventory what was
+bought and pick out recipes that could be made. The problem is we are not transforming the locked in data, ie the nutritional information on the upc label of the grocery product. And, the second problem is that are addressing a decreasing consumer trend in that overworked Americans who are oputting in more work hours are choosing not to grocery shop.
 
-Show me an iphone and android developer I will show that they ignore android
-at your company's peril..
-
-
-
+For those funded start-ups that understand that their idea has to be transformed into a mobile application product and not a web application product pretending to be a mobile application, my contact information is on my github profile:
 
 [GitHub Profile](https://github.com/shareme)
 
