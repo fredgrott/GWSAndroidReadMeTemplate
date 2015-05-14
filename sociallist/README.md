@@ -4,9 +4,14 @@
 
 [![BitBucket](../art/bitbucket80x80.png)](https://bitbucket.org/fredgrott)[![CoderWall](../art/coderwall80x80.png)](https://coderwall.com/shareme)[![GeekList](../art/geeklist80x80.png)](https://geekli.st/fredgrott)[![Gists](../art/gists80x80.png)](https://gist.github.com/shareme)[![GitHub](../art/github80x80.png)](https://github.com/shareme)[![StackOverflow](../art/stackoverflow80x80.png)](http://stackoverflow.com/users/237740/fred-grott)
 
+## BookMarks
+
+[![Delicious](../art/delicious80x80.png)](https://delicious.com/shareme)
+
+
 ## CVs
 
-[![LinkedIN](../art/linkedin80x80.png)](http://www.linkedin.com/in/shareme/en)[![Xing](../art/xing80x80.png)](https://www.xing.com/profile/Fred_Grott?sc_o=mxb_p)
+[![LinkedIN](../art/linkedin80x80.png)](http://www.linkedin.com/in/shareme/en)[![Xing](../art/xing80x80.png)](https://www.xing.com/profile/Fred_Grott?sc_o=mxb_p)[![AboutMe](../art/aboutme80x80.png)](https://about.me/fredgrott)
 
 ## GWS Website
 
