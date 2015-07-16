@@ -1,6 +1,23 @@
 # GWSAndroidReadMeTemplate
 ![ReadMe Template cartoon](/art/readmetemplatecartoon.png)
 
+# TOC
+
+* [Implementation](#Implementation)
+* [API Target Levels](#API Target Levels)
+* [Dependencies](#Dependencies)
+* [Usage](#Usage)
+* [Demos](#Demos)
+* [ChangeLog](#ChangeLog)
+* [Credits](#Credits)
+* [Contributing and Contributors](#Contributing and Contributors)
+* [Trademarks](#Trademarks)
+* [Resources](#Resources)
+   * [Articles](##Articles)
+   * [Developer Sites](##Developer Sites)
+* [About Fred Grott and GrottWorkShop](#About Fred Grott and GrottWorkShop)
+* [License](#License)
+
 **shields here such as
 **![Apache License 2 shield](https://img.shields.io/badge/License-Apache2-red.svg)
 **![UI Library shield](https://img.shields.io/badge/LibraryType-UI-blue.svg)
@@ -35,7 +52,7 @@ Fork, this repo and re-use my template..
 
 [GWSAndroidReadMeTemplate Repo](https://github.com/shareme/GWSAndroidReadMeTemplate)
 
-# Implementation
+##Implementation
 
 **Sound bite to two audiences tech and non-tech about the implementation**
 
@@ -43,55 +60,55 @@ In our information age, people scan...
 
 
 
-# API Target Levels
+##API Target Levels
 
 **describe the api levels lib or app demo targets**
 
-# Dependencies
+##Dependencies
 
 **describe the dependencies used**
 
-# Usage
+##Usage
 
 **usage directions go here, for example how to use library or how to run the demo
 application**
 
-# Demos
+##Demos
 
 **demos urls and videos go here**
 
 
-# ChangeLog
+##ChangeLog
 
 [Full ChangeLog List](https://github.com/shareme/GWSAndroidReadMeTemplate/changelog/)
 
 
 
 
-# Credits
+##Credits
 
 **code used from other projects gets credited here listing code author and repo url**
 
-# Contributing and Contributors
+##Contributing and Contributors
 
 You can contribute by forking the repo and committing a change to the fork and than making a pull request. [Making A Pull Request-GitHub Help]()
 
 **Contributors List goes here**
 
 
-# Trademarks
+##Trademarks
 
 Android is a Google trademark.
 
-# Resources
+##Resources
 
 Helpful resources for both the beginner and intermediate android developer.
 
-## Articles
+###Articles
 
 [Articles](https://github.com/shareme/GWSAndroidReadMeTemplate/artilces/)
 
-## Developer Sites
+###Developer Sites
 
 [Google Android Developer Site](http://developer.android.com)
 
@@ -103,7 +120,7 @@ Helpful resources for both the beginner and intermediate android developer.
 
 
 
-# About Fred Grott and GrottWorkShop
+##About Fred Grott and GrottWorkShop
 
 ![GWS Logo](/art/gws_logo_longform_final.png)
 
@@ -158,7 +175,7 @@ You can contact me at firstname dot lastname at gmail dot com.
 
 [Fred Grott GWS Social Profiles Full List](https://github.com/shareme/GWSAndroidReadMeTemplate/sociallist/)
 
-# License
+##License
 Copyright (c) 2015 Fred Grott(GrottWorkShop)
 
 Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License.You may obtain a copy of the License at
