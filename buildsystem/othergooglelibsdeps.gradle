@@ -1,0 +1,4 @@
+ext{
+  googleWearable 'com.google.android.support:wearable:1.2.0'
+  googleWearWear 'com.google.android.wearable:wearable:1.0.0'
+}

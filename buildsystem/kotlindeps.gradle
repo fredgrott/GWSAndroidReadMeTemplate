@@ -1,0 +1,1 @@
+//stdlib for kotlin is loaded as ext with gradle plugins as the //kotlin gradle plugin and kotlin std lib have to have the same //versions

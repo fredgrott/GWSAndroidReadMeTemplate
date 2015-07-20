@@ -1,0 +1,4 @@
+ext{
+  picasso 'com.squreup.picasso:picasso:2.5.2'
+
+}

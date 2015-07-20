@@ -1,0 +1,18 @@
+ext{
+
+  assertjAndroid 'com.squareup.assert:assertj-android:'
+  assertjAndroidAppCompat 'com.squareup.assert:assertj-android-appcompat-v7:'
+  assertAndroidCardView 'com.squareup.assertj:assertj-android-cardview-v7:'
+  assertjAndroidGridLayout 'com.squareup.assertj:assertj-android-gridlayout-v7:'
+  assertjAndroidMediaRouter 'com.squareup.assertj:assertj-android-mediarouter-v7:'
+  assertjAndroidPalette 'com.squareup.assertj:assertj-android-palette-v7:'
+  assertjAndroidPlayServices 'com.squareup.assertj:assertj-android-play-services:'
+  assertjAndroidRecyclerView 'com.squareup.assertj:assertj-android-recyclerview-v7:'
+  assertjAndroidSupportFour 'com.squareup.assertj:assertj-android-support-v4:'
+
+  dexMaker 'com.google.dexmaker:dexmaker:1.0'
+  dexMakerMockito 'com.google.dexmaker:dexmaker-mockito:1.0'
+  mockito   'org.mockito:mockito-core:1.10.19'
+
+
+}

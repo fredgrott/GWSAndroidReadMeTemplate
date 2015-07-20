@@ -1,0 +1,24 @@
+buildTime = new Date().format("yyyy-MM-dd'T'HH:mm", TimeZone.getTimeZone("CST"))
+
+
+advancedVersioning {
+    nameOptions {
+        versionMajor 1
+        versionMinor 0
+        versionPatch 0
+        versionBuild 0
+    }
+    codeOptions {
+        versionCodeType org.moallemi.gradle.internal.VersionCodeType.AUTO_INCREMENT_ONE_STEP
+        dependsOnTasks 'release, debug'
+
+    }
+    outputOptions {
+        renameOutput true
+        // if product flavors exist than include $flavorName in this string
+        nameFormat '$appName-$projectName-$buildType-$buildTime-$versionName-$versionCode'
+    }
+}
+
+def appVersionName = advancedVersioning.versionName
+def int appVersionCode = advancedVersioning.versionCode
