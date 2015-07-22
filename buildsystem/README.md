@@ -1,67 +1,83 @@
-# BuildSystem
+# Build System
 
-We have some tradeoffs in designing a module android gradle build-system and hopefully I have made the right choices.
+To use the advance techniques of dagger, OOP and Compound Patterns, kotlin, RX, etc
+one has to go beyond the simplistic build.gradle templates that the Android Studio
+IDE uses.  I adapt a somewhat modular approach while at the same time future proofing
+my gradle coding blocks so that it is updatable to the future Google Android Gradle
+Plugin versions.
 
+This document is intended to document all the gradle coding and other techniques so that this build system can be maintained with very limited effort. You are more than welcomed to borrow and steal my techniques and gradle code.
 
+Why go through all the extra settings to debug log the libraries we use and use
+enhanced logging libraries in our test code?  Because the way Google has implemented testing on the Cloud is by sending the test apk and the optional tested apk to the
+test server rather than a CI server approach. Hence, our best practices approach is
+to ensure we get the maximum amount of test feedback.
 
 # TOC
 
-* [Gradle Plugins](#Gradle Plugins)
-* [Dependencies](#Dependencies)
-* [Android Config](#Android Config)
-* [Module Root Config Block](#Module Root Config Block)
-* [DexOptions](#DexOptions)
-* [TestOptions](#TestOptions)
-* [SnapShots](#SnapShots)
-* [MyBintTray](#MyBinTray)
-* [GIT SHA](#GTI SHA)
-* [Espresso SetUp](#Espresso SetUp)
-* [Jacoco Coverage](#Jacoco Coverage)
-* [BuildConfigField](#BuildConfigField)
-* [AaptOptions](#AaptOptions)
+* [Root Build File](#Root Build File)
+* [ProGuard Files](#ProGuard Files)
+* [Lombok Config Files](#Lombok Config Files)
+* [Application Module Non Product Flavors Build File](#Application Module Non Product Flavors Build File)
+* [Library Module Non Product Flavors Build File](#Library Module Non Product Flavors Build File)
 
-##Gradle Plugins
+##Root Build File
 
-gradleplugindeps. gradle
+We start out with the root build file in that we do not want this long file of all the dependencies we use as ext variables, etc. We instead want one fake plugin gradle build file listing all our possible ext variables that gets loaded into the root build file.
 
-```gradle
-ext{
-     androidGradlePlugin 'com.android.tools.build:gradle:1.3.0-beta4'
-     hugoGradlePlugin 'com.jakewharton.hugo:hugo-plugin:1.2.1'
-     androidAPTGradlePlugin 'com.neenbedankt.gradle.plugins:android-apt:1.5.1'
+And we block off distinct sections of the ext block so that its easy to update a portion of said ext block.
 
-     spoonGradlePlugin 'com.stanfy.spoon:spoon-gradle-plugin:1.0.3'
-     spoonClient 'com.squareup.spoon:spoon-client:1.1.9'
+The trade-off we make is that by using a variable for things like the Google Android
+Gradle plugin entry in the root build file is that we turn off IDE notification of an update to that plugin. This instead forces the developer to think about whether the
+update of that plugin is required for the project in terms of the gradle code used and
+prevent updating the plugin based upon impulse.
 
-     //versions must be the same for plugin and STDlib
-     intellijKotlinGradlePlugin 'org.jetbrains.kotlin:kotlin-gradle-plugin:0.12.613'
-     kotlinSTDLibCompile 'org.jetbrains.kotlin:kotlin-stdlib:0.12.613'
-     kotterKnife ''
+we also group together the direct dependencies and indirect of the plugin, if there are any, as sometimes the versions have to match the version of the gradle plugin.
 
+Thus we have:
 
-
-     gradleAdvanceBuildVersion 'org.moallemi.gradle.advanced-build-version:gradle-plugin:1.5.0'
-     androidMavenGradlePlugin 'com.github.dcendents:android-maven-gradle-plugin:1.3'
-     bintrayGradlePlugin 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.2'
-     godotGradleBuildStatsPlugin 'de.hannesstruss:godot:0.2'
-     googleDataBindingGradlePlugin 'com.android.databinding:dataBinder:1.0-rc0'
-
-}
-
-```
-
-
-##Dependencies
-
-Let's group dependencies into their own group gradle build files:
-
-playservicesdeps.gradle
+rootext.gradle
 
 ```gradle
 ext{
-  //all these are compile
-  //proguard stuff is already taken care by the library itself
-  //as there is a proguard.txt file with each lib  aar
+
+  //Configure stuff
+  ourReportsDir = 'build/reports'
+  //Android
+  //def globalConfiguration = rootProject.extensions.getByName("ext")
+  //than globalConfiguration.getAt("androidCompileSdkVersion")
+  androidCompileSdkVersion = 22
+  androidBuildToolsVersion = "22.0.1"
+  //Android.defaultConfig
+  androidMinSdkVersion = 15
+  androidTargetSdkVersion = 22
+
+
+
+
+
+  //Our Gradle plugins
+  androidGradlePlugin 'com.android.tools.build:gradle:1.3.0-beta4'
+  hugoGradlePlugin 'com.jakewharton.hugo:hugo-plugin:1.2.1'
+  androidAPTGradlePlugin 'com.neenbedankt.gradle.plugins:android-apt:1.5.1'
+
+  spoonGradlePlugin 'com.stanfy.sppon:spoon-gradle-plugin:1.0.3'
+  spoonClient 'com.squareup.spoon:spoon-client:1.1.9'
+
+  intellijKotlinGradlePlugin 'org.jetbrains.kotlin:kotlin-gradle-plugin:0.12.613'
+  kotlinSTDLibCompile 'org.jetbrains.kotlin:kotlin-stdlib:0.12.613'
+  kotterKnife 'com.jakewharton:kotterknife:0.1.0-SNAPSHOT'
+
+  gradleAdvanceBuildVersion 'org.moallemi.gradle.advanced-build-version:gradle-plugin:1.5.0'
+  androidMavenGradlePlugin 'com.github.dcendents:android-maven-gradle-plugin:1.3'
+  bintrayGradlePlugin 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.2'
+  godotGradleBuildStatsPlugin 'de.hannesstruss:godot:0.2'
+  googleDataBindingGradlePlugin 'com.android.databinding:dataBinder:1.0-rc0'
+
+  //rest of our possible dependencies
+
+  //play services, proguard.txt is included in the aars thus no need for a separate
+  //set of proguard files at module subfolder
   playServicesAll 'com.google.android.gms:play-services:7.5.0'
   playServicesAds 'com.google.android.gms:play-services-ads:7.5.0'
   playServicesAllWear 'com.google.android.gms:play-services-all-wear:7.5.0'
@@ -86,16 +102,9 @@ ext{
   playServicesWearable 'com.google.android.gms:play-services-wearable:7.5.0'
 
 
-}
-```
-
-Next up is our support libs, ie
-
-androidsupportlibsdeps.gradle
-
-```gradle
-ext{
-  //all these are compile deps
+  //android support libs, same thing as the AndroidGradlePlugin in that
+  //using the ext var turns off the IDE update notification but forces the
+  //dev to update based on project needs rather than impulse
   appCompat 'com.android.support:appcompat-v7:22.2.1'
   cardView 'com.android.support:cardview-v7:22.2.1'
   design 'com.android.support:design:22.2.1'
@@ -111,58 +120,38 @@ ext{
   supportFour  'com.android.support:support-v4:22.2.1'
   supportThirteen 'com.android.support:support-v13:22.2.1'
 
-
   testEspresso 'com.android.support.test:testing-support-lib:0.1'
   testRunner 'com.android.support.test:runner:0.3'
   testRules 'com.android.support.test:rules:0.3'
   testUiAutomator 'com.android.support.test:uiautomator:uiautomator-v18:2.1.1'
   testExposedInstrumentationApiPublish 'com.android.support.test:exposed-instrumentation-api-publish:0.3'
 
+  //should strive to have version number match the 2nd digit of major and
+  //the minor and patch numbers of the support libs as it has that
+  //dependency however Google doesn't always update these concurrently with
+  //the support libs like they should and you may have to force a dependency to
+  //right things
   espresso 'com.android.support.test.espresso:espresso-core:2.2'
   espressoContributions 'com.android.test.espresso:espresso-contrib:2.2'
   espressoIntents 'com.android.test.espresso:espresso-intents:2.2'
   espressoWeb 'com.android.test.espresso:espresso-web:2.2'
-}
-```
-Now for other annotations
 
-
-```gradle
-ext{
-
-  javaxAnnotations 'org.glassfish:javax.annotation:10.0-b28'
-  findbugsAnnotations 'com.google.code.findbugs:annotations:3.0.0'
-
-}
-
-```
-
-Now for other google libs
-
-```gradle
-ext{
+  //other google libs
   googleWearable 'com.google.android.support:wearable:1.2.0'
   googleWearWear 'com.google.android.wearable:wearable:1.0.0'
-}
-```
 
-Now for other test libs
+  //assertj libs for testing
+  assertjAndroid 'com.squareup.assert:assertj-android:1.0.1-SNAPSHOT'
+  assertjAndroidAppCompat 'com.squareup.assert:assertj-android-appcompat-v7:1.0.1-SNAPSHOT'
+  assertAndroidCardView 'com.squareup.assertj:assertj-android-cardview-v7:1.0.1-SNAPSHOT'
+  assertjAndroidGridLayout 'com.squareup.assertj:assertj-android-gridlayout-v7:1.0.1-SNAPSHOT'
+  assertjAndroidMediaRouter 'com.squareup.assertj:assertj-android-mediarouter-v7:1.0.1-SNAPSHOT'
+  assertjAndroidPalette 'com.squareup.assertj:assertj-android-palette-v7:1.0.1-SNAPSHOT'
+  assertjAndroidPlayServices 'com.squareup.assertj:assertj-android-play-services:1.0.1-SNAPSHOT'
+  assertjAndroidRecyclerView 'com.squareup.assertj:assertj-android-recyclerview-v7:1.0.1-SNAPSHOT'
+  assertjAndroidSupportFour 'com.squareup.assertj:assertj-android-support-v4:1.0.1-SNAPSHOT'
 
-testlibsdeps.gradle
-
-```gradle
-ext{
-
-  assertjAndroid 'com.squareup.assert:assertj-android:'
-  assertjAndroidAppCompat 'com.squareup.assert:assertj-android-appcompat-v7:'
-  assertAndroidCardView 'com.squareup.assertj:assertj-android-cardview-v7:'
-  assertjAndroidGridLayout 'com.squareup.assertj:assertj-android-gridlayout-v7:'
-  assertjAndroidMediaRouter 'com.squareup.assertj:assertj-android-mediarouter-v7:'
-  assertjAndroidPalette 'com.squareup.assertj:assertj-android-palette-v7:'
-  assertjAndroidPlayServices 'com.squareup.assertj:assertj-android-play-services:'
-  assertjAndroidRecyclerView 'com.squareup.assertj:assertj-android-recyclerview-v7:'
-  assertjAndroidSupportFour 'com.squareup.assertj:assertj-android-support-v4:'
-
+  //other testing libs
   junit junit:junit:4.12'
   dexMaker 'com.google.dexmaker:dexmaker:1.0'
   dexMakerMockito 'com.google.dexmaker:dexmaker-mockito:1.0'
@@ -172,43 +161,19 @@ ext{
   hamcrestCore 'org.hamcrest:hamcrest-core:1.3'
   truthLib 'com.google.truth:truth:0.27'
 
-
-
+  //debug libs
   madge 'com.jakewharton.madge:madge:1.1.2'
   scalpel 'com.jakewharton.scalpel:scalpel:1.1.2'
-}
-```
-
-Now dagger
-
-daggerdeps.gradle
-
-```gradle
-ext{
-  dagger 'com.google.dagger:dagger:2.0'
-  daggerCompile 'com.google.dagger:dagger-compiler:2.0'
-
-}
-```
-
-Now leakcanary
-
-leakcanarydeps.gradle
-
-```gradle
-ext{
   leakCanary 'com.squareup.leakcanary:leakcanary-android:1.3'
   leakCanaryNOOP 'com.squareup.leakcanary:leakcanary-android-no-op:1.3'
 
-}
-```
 
-Now for retrofit and okhttp
+  //dagger libs
+  dagger 'com.google.dagger:dagger:2.0'
+  daggerCompiler 'com.google.dagger:dagger-compiler:2.0'
+  javaxAnnotations 'org.glassfish:javax.annotation:10.0-b28'
 
-retrofitokhttpdeps.gradle
-
-```gradle
-ext{
+  //retrofit libs
   okHttp 'com.squareup.okhttp:okhttp:2.3.0'
 
   okMockWebService 'com.squareup.okhttp:mockwebserver:2.3.0'
@@ -219,153 +184,189 @@ ext{
 
   retrofitMock 'com.squareup.retrofit:retrofit-mock:1.9.0'
 
-}
-```
 
-Now for timber libs
-
-timberdeps.gradle
-
-```gradle
-ext{
+  //log libs
   timber 'com.jakewharton.timber:timber:3.1.0'
   timberLint  'com.jakewharton.timber:timber-lint:3.1.0'
 
-}
-```
-
-Now for butterknife
-
-butterknifedeps.gradle
-
-```gradle
-ext{
+  //butterknife libs
   butterKnife  'com.jakewharon:butterknife:6.1.0'
 
-}
-```
-
-Now for renderers lib
-
-renderersdeps.gradle
-
-```gradle
-ext{
-  renderers 'com.github.pedrovgs:renderers:1.5'
-
-}
-```
-
-Now for colours lib
-
-coloursdeps.gradle
-
-```gradle
-ext{
-  colours 'com.github.matthewyork:ColoursLibrary:1.0.0'
-
-}
-```
-
-Now for androidjoda libs
-
-androidjodadeps.gradle
-
-```gradle
-ext{
-  androidJoda 'net.dnlew:android-joda:2.7.2'
-
-}
-```
-
-Now for rxandroid deps
-
-rxandroiddeps.gradle
-
-```gradle
-ext{
+  //rxandroid
   rxAndroid 'io.reactivex:rxandroid:0.24.0'
   rxKotlin 'io.reactivex:rxkotlin:0.21.0'
-}
-```
 
-Now for picasso
-
-picassodeps.gradle
-
-```gradle
-ext{
+  //other dependencies
+  renderers 'com.github.pedrovgs:renderers:1.5'
+  colours 'com.github.matthewyork:ColoursLibrary:1.0.0'
+  androidJoda 'net.dnlew:android-joda:2.7.2'
   picasso 'com.squreup.picasso:picasso:2.5.2'
 
-}
-```
-
-Now for Jacoco
-
-jacocodeps.gradle
-
-```gradle
-ext{
-  jacocoAgent 'org.jacoco:org.jacoco.agent:0.7.4.201502262128'
-  jacocoAnt   'org.jacoco:org.jacoco.ant:0.7.4.201502262128'
-}
-```
-
-Now for codeqa
-
-codeqadeps.gradle
-
-```gradle
-ext{
+  //codeqa
   findbugs 'com.google.code.findbugs:findbugs:3.0.0'
+  findbugsAnnotations 'com.google.code.findbugs:annotations:3.0.0'
   checkstyle 'com.puppycrawl.tools:checkstyle:6.1'
   javancss 'org.codehaus.javancss:javancss:33.54'
   jdepend 'jdepend:jdepend:2.9.1'
   jdependAnt 'org.apache.ant:ant-jdepend:1.8.2'
   pmdJava 'net.sourceforge.pmd:pmd-java:5.2.1'
-}
-```
 
-Now for jackson deps
-
-jacksondeps.gradle
-
-```gradle
-ext{
-  jacksonAnnotations 'com.fasterxml.jackson.core:jackson-annotations:2.5.3'
-  jacksonCore 'com.fasterxml.jackson.core:jackson-core:2.5.3'
-  jacksonDatabind 'com.fasterxml.jackson.core:jackson-databind:2.5.3'
-}
-```
-
-That should be it for my dependencies.
-
-##Android Config
-
-androidconfig.gradle
-
-```gradle
-
-```gradle
-ext{
-    //Android
-    androidCompileSdkVersion = 22
-    androidBuildToolsVersion = "22.0.1"
-    //Android.defaultConfig
-    androidMinSdkVersion = 15
-    androidTargetSdkVersion = 22
+  jacocoAnt 'org.jacoco:org.jacoco.ant:0.7.4.201502262128'
+  jacoocAgent 'org.jacoco:org.jacoco.agent:0.7.4.201502262128'
 
 
 }
+```
+
+In our root build file:
+
+```gradle
+// Top-level build file where you can add configuration options common to all sub-projects/modules.
+
+apply from: 'buildsystem/rootext.gradle'
+
+def gradlePlugins = rootProject.ext
+
+buildscript {
+    repositories {
+        jcenter()
+    }
+    dependencies {
+        classpath gradlePlugins.androidGradlePlugin
+        classpath gradlePlugins.hugoGradlePlugin
+        classpath gradlePlugins.androidAPTGradlePlugin
+        classpath gradlePlugins.spoonGradlePlugin
+        classpath gradlePlugins.intellijKotlinGradlePlugin
+        classpath gradlePlugin.gradleAndvanceBuildVersion
+        classpath gradlePlugins.androidMavenGradlePlugin
+        classpath gradlePlugins.bintrayGradlePlugin
+        classpath gradlePlugins.godotGradleBuildStatsPlugin
+        classpath gradlePlugins.googleDataBindingGradlePlugin
+
+
+
+        // NOTE: Do not place your application dependencies here; they belong
+        // in the individual module build.gradle files
+    }
+}
+//The first part of our configuration to turn off preDexing
+//when build is executed on a CI server, its also how
+//we turn on codeqa report generation
+project.ext.preDexLibs = !project.hasProperty('disablePreDex')
+
+
+allprojects {
+    repositories {
+        jcenter()
+        //oss snapshots
+        maven {
+            url 'http://oss.sonatype.org/content/repositories/snapshots'
+        }
+
+    }
+    //sets the jvmArgs so that tests will not steal focus as we have
+    //the forked process launched as jvm headless
+    tasks.withType(JavaForkOptions) {
+    // Forked processes like GradleWorkerMain for tests won't steal focus!
+    jvmArgs '-Djava.awt.headless=true'
+    }
+}
+
+apply plugin: 'de.hannesstruss.godot'
+
 
 ```
 
+And so that takes care of the needed additions to the root build file.
 
-##Module Root Config Block
+##ProGuard Files
 
-modulerootconfigblocknonflavor.gradle
+We need:
+
+
+
+proguard-butterknife.txt
 
 ```gradle
+-dontwarn butterknife.internal.**
+-keep class butterknife.** { *; }
+-keep class **$$ViewInjector { *; }
+
+-keepclasseswithmembernames class * {
+    @butterknife.InjectView <fields>;
+}
+
+-keepclasseswithmembernames class * {
+    @butterknife.OnClick <methods>;
+    @butterknife.OnEditorAction <methods>;
+    @butterknife.OnItemClick <methods>;
+    @butterknife.OnItemLongClick <methods>;
+    @butterknife.OnLongClick <methods>;
+}
+```
+
+proguard-daggertwo.txt  
+
+```gradle
+-keep class dagger.** { *; }
+-keep interface dagger.** { *; }
+# not sure this is needed, uncomment if needed
+# -keepnames class com.ourcompany.**
+
+-keep class **$$ModuleAdapter { *; }
+-keep class **$$InjectAdapter { *; }
+-keep class **$$StaticInjection
+
+-keepclassmembers class * {
+    @javax.inject.* <fields>;
+    @javax.inject.* <init>(...);
+    @dagger.* *;
+}
+-adaptclassstrings
+-keepnames class dagger.Lazy
+```
+
+proguard.project.txt
+
+```gradle
+-keep class
+com.companyname.projectname.BuildConfig[*;]
+```
+
+
+##Lombok Config Files
+
+Yes, I use Lombok. We need two lombok.config files so at project root:
+
+lombok.config
+
+```gradle
+config.stopBubbling = true
+lombok.anyConstructor.suppressConstructorProperties = true
+```
+Than if we need any module specific settings its a lombok.config file at the module root
+
+##Application Module Non Product Flavors Build File
+
+This is an example of what the application module build file should look like with
+our stuff and lots of notes and comments:
+
+application module build.gradle file:
+
+```gradle
+apply plugin: 'com.android.application'
+//test collating plugin
+apply plugin: 'spoon'
+//debug annotation plugin
+apply plugin: 'hugo'
+//build version and renaming apk plugin
+apply plugin: 'org.moallemi.advanced-build-version'
+
+//Our App Module Configuration Set-Up
+def globalConfiguration = rootProject.extensions.getByName("ext")
+//our build version and apk renaming Configuration, it requires a
+//version.properties file at module root with this:
+//AI_VERSION_CODE=0
 buildTime = new Date().format("yyyy-MM-dd'T'HH:mm", TimeZone.getTimeZone("CST"))
 
 
@@ -391,19 +392,379 @@ advancedVersioning {
 def appVersionName = advancedVersioning.versionName
 def int appVersionCode = advancedVersioning.versionCode
 
-```
-
-##DexOptions
-
-At root build:
-
-project.ext.preDexLibs = !project.hasProperty('disablePreDex')
 
 
-dexoptionsappmodulenonproductflavors.gradle
 
-```gradle
+
+android {
+    compileSdkVersion globalConfiguration.getAt("androidCompileSdkVersion")
+    buildToolsVersion globalConfiguration.getAt("androidBuildToolsVersion")
+
+
+    defaultConfig {
+        //required so that the applicationId is decoupled from the
+        //packageName node in manifest so refactoring works
+        applicationId "com.grottworkshop.gwsindiainkapp"
+        minSdkVersion globalConfiguration.getAt("androidMinSdkVersion")
+        targetSdkVersion globalConfiguration.getAt("androidMinSdkVersion")
+        versionCode appVersionCode
+        versionName appVersionName
+
+        //testApplicationId defaults to applicationId = '.test'
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        testHandleProfiling true
+        testFunctionalTest true
+
+
+
+    }
+
+    aaptOptions {
+        noCompress 'txt'
+        ignoreAssetsPattern "!.svn:!.git:!.ds_store:!*.scc:.*:<dir>_*:!CVS:!thumbs.db:!picasa.ini:!*~"
+    }
+
+    //to enable logging of tests
+    testOptions.unitTests.all {
+        testLogging {
+             events 'passed', 'skipped', 'failed', 'standardOut', 'standardError'
+        }
+    }
+    testOptions{
+      //xml reports
+      resultsDir = "${globalConfiguration.ourReportsDir}"
+      //html reports
+      reportDir = "${globalConfiguration.ourReportsDir}"
+
+    }
+
+    signingConfigs {
+
+        release {
+            //props stored in gradle.properties at userhome .gradle subfolder
+            //for example in my gradle.properties in my .gradle subfolder
+            //FREDGROTT_RELEASE_STORE_FILE=C:\\Users\\fgrott\\fredgrott.keystore
+            //easy huh?
+            storeFile file(FREDGROTT_RELEASE_STORE_FILE)
+            storePassword FREDGROTT_RELEASE_STORE_PASSWORD
+            keyAlias FREDGROTT_RELEASE_KEY_ALIAS
+            keyPassword FREDGROTT_RELEASE_KEY_PASSWORD
+        }
+
+    }
+    /*
+    Enables diamond operator, multi-catch, strings in switches for our
+    minSdkVersion to compileSdkVersion range.
+     */
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_7
+        targetCompatibility JavaVersion.VERSION_1_7
+    }
+
+    packagingOptions{
+
+    }
+
+    //coverage reports will be generated with the command:
+    // ./gradlew createDebugCoveragereport or
+    // ./gradlew connectCheck
+    //reports will be found in build/reports/coverage/BuildType
+    jacoco{
+        version = '0.7.4.201502262128'
+    }
+
+
+
+    buildTypes {
+      //our buildConfigField defs
+      def STRING = "String"
+      def gitshaString = "GIT_SHA"
+      def gitSha = 'git rev-parse --short HEAD'.execute([], project.rootDir).text.trim()
+      def gitShaValue = "\"${gitSha}\""
+      def buildTimeStampString = "Build_TIME_STAMP"
+      def buildTimeStampValue = "\"${buildTime}\""
+
+      def BOOLEAN = "boolean"
+      def TRUE = "true"
+      def FALSE = "false"
+      def LOG_HTTP_REQUESTS = "LOG_HTTP_REQUESTS"
+      def REPORT_CRASHES = "REPORT_CRASHES"
+      def ENABLE_VIEW_SERVER = "ENABLE_VIEW_SERVER"
+      def ENABLE_SHARING = "ENABLE_SHARING"
+      def DEBUG_IMAGES = "DEBUG_IMAGES"
+
+      debug {
+        debuggable true
+        minifyEnabled false
+
+        testCoverageEnabled true
+        applicationIdSuffix '.dev'
+        versionNameSuffix '-dev-'
+
+      }
+
+        release {
+          minifyEnabled true
+          proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro',  'proguard-butterknife.txt', 'proguard-daggertwo.txt', 'proguard.project.txt'
+           applicationIdSuffix '.release'
+           versionNameSuffix '-release-'
+           signingConfig signingConfigs.release
+
+        }
+    }
+    //options are listed to the order in the LintOptions.java class file
+    lintOptions {
+        lintConfig file("my-custom-lint.xml")
+
+        //if true, stop the gradle build if errors are found (true by default)
+        abortOnError false
+        // if true, emit full/absolute paths to files with errors (true by default)
+        //absolutePaths true
+        //if true, no source lines will be included in output (true by default)
+        noLines false
+        // set to true to turn off analysis progress reporting by lint
+        quiet false
+        // if true, check all issues, including those that are off by default
+        checkAllWarnings true
+        // if true, only report errors
+        ignoreWarnings true
+        // if true, treat all warnings as errors
+        warningsAsErrors true
+        // if true, show all locations for an error, do not truncate lists, etc.
+        showAll true
+        // and abort the build (controlled by abortOnError above) if fatal issues are // found (true by default)
+        //checkReleaseBuilds true
+        // explain issues (true by default) because xml and html reports
+        // ignores this setting and explains issues anyway this setting is just
+        // to explain issues per the stdout output
+        //explainIssues true
+
+        // turn off checking the given issue id's
+        //disable 'TypographyFractions', 'TypographyQuotes'
+        // turn on the given issue id's
+        //enable 'RtlHardcoded', 'RtlCompat', 'RtlEnabled'
+        // check *only* the given issue id's
+        check 'NewApi', 'InlinedApi'
+
+
+
+        // if true, generate a text report of issues (false by default)
+        textReport true
+        // location to write the output; can be a file or 'stdout'
+        textOutput 'stdout'
+        // if true, generate an XML report for use by for example Jenkins
+        xmlReport true
+        // file to write report to (if not specified, defaults to lint-results.xml)
+        xmlOutput file("${globalConfiguration.ourReportsDir}/lint-report.xml")
+        // if true, generate an HTML report (with issue explanations, sourcecode, etc)
+        htmlReport true
+        // optional path to report (default will be lint-results.html in the builddir)
+        htmlOutput file("${globalConfiguration.ourReportsDir}/lint-report.html")
+
+
+
+        // Set the severity of the given issues to fatal (which means they will be
+        // checked during release builds (even if the lint target is not included)
+        //fatal 'NewApi', 'InlineApi'
+        // Set the severity of the given issues to error
+        //error 'Wakelock', 'TextViewEdits'
+        // Set the severity of the given issues to warning
+        //warning 'ResourceAsColor'
+        // Set the severity of the given issues to ignore (same as disabling the //check)
+        //ignore 'TypographyQuotes'
+
+
+    }
+
+
+}
+
+spoon {
+    // devices = ['333236E9AE5800EC']
+    debug = true
+    //className = 'fully.qualified.TestCase'
+
+    //methodName = 'testMyApp'
+
+    baseOutputDir = file("${globalConfiguration.ourReportsDir}/spoon")
+    // Enable setting test class/method-to-be-run from command line. E.g.:
+    // $> ../gradlew spoonFreeDebugTest //-PspoonClassName=com.stanfy.spoon.example.test.MainActivityTest //-PspoonMethodName=testSetText
+  if (project.hasProperty('spoonClassName')) {
+    className = project.spoonClassName
+
+    if (project.hasProperty('spoonMethodName')) {
+      methodName = project.spoonMethodName
+    }
+  }
+
+}
+
+configurations{
+  //apt, provided, compile, androidTestCompile, androidJacocoAnt, androidJacocoAgent
+  //are already setup
+  codeqa
+}
+
+dependencies {
+    compile fileTree(dir: 'libs', include: ['*.jar'])
+    compile globalConfiguration.appCompat
+    //annotations
+    compile globalConfiguration.supportAnnotations
+    provided globalConfiguration.lombok
+    apt globalConfiguration.lombok
+    compile globalConfiguration.findbugsAnnotations
+
+
+    //we can get a debug log of libraries by publishNonDefault true of
+    //lib variants and using the gradle hugo plugin and marking all
+    //lib methods @DebugLog and loading both variants as
+    //deps in our app  module, if project lib as aar than use the release and
+    //debug qualifiers
+    compile project(path: ":gwsindiainklibrary", configuration:"release")
+    debugCompile project(path:":gwsindiainklibrary", configuration:"debug")
+
+    //dagger Set-Up
+    //if we are using kotlin than we have:
+    //kapt globalConfiguration.daggerCompiler
+    //compile globalConfiguration.dagger
+    //provided globalConfiguration.javaxAnnotations
+    // and kotlin and the kotlin gradle plugin snapshot instead
+    apt globalConfiguration.daggerCompiler
+    compile globalConfiguration.dagger
+    provided globalConfiguration.javaxAnnotations
+
+    //butterknife
+    compile globalConfiguration.butterKnife
+
+    //our log libs
+    compile globalConfiguration.timber
+    compile globalConfiguration.timberLint
+
+    //compile globalConfiguration.retrofit
+    //compile globalConfiguration.okhttp
+    //compile globalConfiguration.okUrlConnection
+    //compile globalConfiguration.okio
+
+    //debug stuff I use
+    debugCompile globalConfiguration.madge
+    debugCompile globalConfiguration.scalpel
+    //debugCompile globalConfiguration.retrofitMock
+    //debugCompile globalConfiguration.okMockWebService
+
+    //jacoco
+    androidJacocoAnt globalConfiguration.jacocoAnt
+    androidJacocoAgent globalConfiguration.jacoocAgent
+
+
+    //unit testing, under test
+    testCompile globalConfiguration.junit
+    testCompile globalConfiguration.mockito
+
+    //uiautomator and espresso
+    androidTestCompile globalConfiguration.runner
+    androidTestCompile globalConfiguration.rules
+    androidTestCompile globalConfiguration.uiautomator
+    androidTestCompile globalConfiguration.hamcrestIntegration
+    androidTestCompile globalConfiguration.espresso
+    androidTestCompile globalConfiguration.espressoContributions
+    //if testing for intents or web
+    //androidTestCompile globalConfiguration.espressoIntents
+    //androidTestCompile globalConfiguration.espressoWeb
+
+    //google's truth framework for unittesting
+    androidTestCompile globalConfiguration.truth
+
+    //our assertj android stuff
+    //gives depends on jar in AS console on builds so not using until
+    //can get rid of error
+    //androidTestCompile globalConfiguration.assertjAndroid
+    //androidTestCompile globalConfiguration.assertjAndroidSupportFour
+    //androidTestCompile globalConfiguration.assertjAndroidAppCompat
+
+    //our codeqa deps
+    codeqa globalConfiguration.checkstyle
+    //updated classycel past 1.4.2 does not have ant tasks ie the one in maven central
+    //thus we stick the lib in our config subfolder and load it
+    //we did something similar for the lombok.jar that was needed just for the
+    //ant task to delombok things for the javadoc task as we should not load it in
+    //libs as it adds stuff that will generate errors.
+    codeqa fileTree(dir: '${rootProject}/config/classycle/lib', include: ['*.jar'])
+    codeqa globalConfiguration.findbugs
+    codeqa globalConfiguration.javancss
+    codeqa globalConfiguration.jdepend
+    codeqa globalConfiguration.jdependAnt
+    codeqa globalConfiguration.pmdJava
+
+}
+
+//so if we do the commandline as part of CI server execution or
+//in our AS terminal:
+//./gradlew clean assemble -PdisablePreDex
+//than our codeqa reports will be generated
+
+def releasePath = file("${rootDir}/archive/${project.name}")
+
+def releaseTask = tasks.create(name: 'release') {
+    group 'Build'
+    description "Assembles and archives all Release builds"
+}
+
+//Our Lombok Stuff, warning the updated lombok jar matching the
+//dependency loaded must be placed in the rootProject/config/lombok/lib subfolder of //the module and you should have your AS lombok plugin installed
+def srcJava = 'src/main/java'
+def srcDelomboked = 'build/src-delomboked/main/java'
+
+task delombok {
+    inputs.files file(srcJava)
+    outputs.dir file(srcDelomboked)
+
+    doLast {
+        FileCollection collection = files(configurations.compile)
+        FileCollection sumTree = collection + fileTree(dir: 'bin')
+
+        ant.taskdef(name: 'delombok', classname: 'lombok.delombok.ant.DelombokTask', classpath: '${rootProject}/config/lombok/lib/lombok.jar')
+        ant.delombok(from:srcJava, to:srcDelomboked, classpath: sumTree.asPath)
+    }
+}
+
+
+//Our last part of our turn off predexing when executed on CI server Set-Up
+//the commandline to turn off predexing when executing on CI server is
+//    ./graddlew clean assemble -PdisablePreDex
+//we also use rootProject.ext.preDexLibs == false to enable our
+//codeqa report runs so that it runs on CI server but on IDE the
+//default is not to run and than to run it we do the commandline of
+// ./gradlew clean assemble -PdisablePreDex
 applicationVariants.all { variant ->
+  //for our javadoc tasks
+  def name = variant.buildType.name
+
+  //I do not skip the debug variants as I am placing output at
+  //project module root/javadocs/compiled/variantBaseName
+  task("javadoc${variant.name.capitalize()}", type: Javadoc) {
+
+        description "Generates Javadoc for $variant.name."
+        title = "Documentation for ${project.name} $android.defaultConfig.versionName b$android.defaultConfig.versionCode"
+        destinationDir = new File("${project.getProjectDir()}/javadocs/compiled/", variant.baseName)
+        setDependsOn(['delombok'])
+        source = srcDelomboked
+        ext.androidJar = "${android.sdkDirectory}/platforms/${android.compileSdkVersion}/android.jar"
+        classpath = files(variant.javaCompile.classpath.files) + ext.androidJar
+        options.memberLevel = org.gradle.external.javadoc.JavadocMemberLevel.PRIVATE
+        options.links('http://docs.oracle.com/javase/7/docs/api/');
+        options.linksOffline('http://d.android.come/reference' '[sdkDir]/docs/reference');
+        exclude '**/BuildConfig.java'
+        exclude '**/R.java'
+        exclude '**/internal/**'
+        failOnError false
+    }
+
+    task("bundleJavadoc${variant.name.capitalize()}", type: Jar) {
+        description "Bundles Javadoc into zip for $variant.name."
+        classifier = "javadoc"
+        from tasks["javadoc${variant.name.capitalize()}"]
+    }
+
   if (rootProject.ext.preDexLibs == true){
     if (variant.buildType.name == 'debug'){
         variant.dex.enableIncremental = true
@@ -412,312 +773,8 @@ applicationVariants.all { variant ->
     }
   }
 
-}
-```
-
-Than we can disable to run CI server with:
-
-```gradle
-./gradlew clean assemble -PdisablePreDex
-```
-
-##TestOptions
-
-###TestLogging
-
-```gradle
-testOptions.unitTests.all {
-    testLogging {
-      events 'passed', 'skipped', 'failed', 'standardOut', 'standardError'
-    }
-  }
-```
-
-##SnapShots
-
-I use OSS sonatype snapshots, mainly assertj. So at the root build script
-for all subprojects we set:
-
-```gradle
-
-allprojects {
-    repositories {
-        jcenter()
-        maven {
-            url 'http://oss.sonatype.org/content/repositories/snapshots'
-        }
-    }
-
-}
-
-
-```
-
-##MyBinTray
-
-At top of module build file:
-
-```gradle
-apply plugin: 'com.github.dcendents.android-maven'
-apply plugin: "com.jfrog.bintray"
-
-version = android.versionName
-
-```
-
-Than at bottom of build file:
-
-```gradle
-def siteUrl = ''
-def gitUrl = ''
-group = ''
-
-install {
-    repositories.mavenInstaller {
-        // This generates POM.xml with proper parameters
-        pom {
-            project {
-                packaging 'aar'
-
-                // Add your description here
-                name 'Android Update Checker'
-                description = 'The project aims to provide a reusable instrument to check asynchronously if exists any newer released update of your Android app on the Store.'
-                url siteUrl
-
-                // Set your license
-                licenses {
-                    license {
-                        name 'The Apache Software License, Version 2.0'
-                        url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
-                    }
-                }
-                developers {
-                    developer {
-                        id 'danielemaddaluno'
-                        name 'Daniele Maddaluno'
-                        email 'daniele.maddaluno@gmail.com'
-                    }
-                }
-                scm {
-                    connection gitUrl
-                    developerConnection gitUrl
-                    url siteUrl
-
-                }
-            }
-        }
-    }
-}
-
-task sourcesJar(type: Jar) {
-    from android.sourceSets.main.java.srcDirs
-    classifier = 'sources'
-}
-
-task javadoc(type: Javadoc) {
-    source = android.sourceSets.main.java.srcDirs
-    classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
-}
-
-task javadocJar(type: Jar, dependsOn: javadoc) {
-    classifier = 'javadoc'
-    from javadoc.destinationDir
-}
-artifacts {
-    archives javadocJar
-    archives sourcesJar
-}
-
-Properties properties = new Properties()
-properties.load(project.rootProject.file('local.properties').newDataInputStream())
-
-// https://github.com/bintray/gradle-bintray-plugin
-bintray {
-    user = properties.getProperty("bintray.user")
-    key = properties.getProperty("bintray.apikey")
-
-    configurations = ['archives']
-    pkg {
-        repo = "maven"
-        // it is the name that appears in bintray when logged
-        name = "androidupdatechecker"
-        websiteUrl = siteUrl
-        vcsUrl = gitUrl
-        licenses = ["Apache-2.0"]
-        publish = true
-        version {
-          gpg {
-              sign = false
-              passphrase = properties.getProperty("bintray.gpg.password") //Optional. The passphrase for GPG signing'
-          }
-//            mavenCentralSync {
-//                sync = true //Optional (true by default). Determines whether to sync the version to Maven Central.
-//                user = properties.getProperty("bintray.oss.user") //OSS user token
-//                password = properties.getProperty("bintray.oss.password") //OSS user password
-//                close = '1' //Optional property. By default the staging repository is closed and artifacts are released to Maven Central. You can optionally turn this behavior off (by putting 0 as value) and release the version manually.
-//            }
-    }
-  }
-}
-
-```
-in local.properties:
-
-```gradle
-bintray.user=<your bintray username>
-bintray.apikey=<your bintray api key>
-
-bintray.gpg.password=<your gpg signing password>
-bintray.oss.user=<your sonatype username>
-bintray.oss.password=<your sonatype password>
-```
-##GIT SHA
-
-At top before android block in module build file:
-
-```gradle
-def gitSha = 'git rev-parse --short HEAD'.execute([], project.rootDir).text.trim()
-```
-
-in the android block:
-
-```gradle
-buildConfigField "String", "GIT_SHA", "\"${gitSha}\""
-
-```
-
-If using Crashlytics in the onCreate of the app:
-
-```java
-Crashlytics.setString("git_sha", BuildConfig.GIT_SHA);
-```
-
-Than in a different directory from the git dev branch of project,
-for example tempogit for example:
-
-```java
-git checkout git_sha_goes_here
-```
-
-Than you will be detached state and can see what is causing the crash.
-Than you hot fix in the git dev branch.
-
-
-##Espresso SetUp
-
-Espresso needs some special stuff enabled so that it is flake free when executing tests.  First the manifest needs an entry that we will manipulate via gradle tasks:
-
-```android
-<?xml version="1.0" encoding="utf-8"?>
-<manifest
-  xmlns:android="http://schemas.android.com/apk/res/android"
-  package="com.novoda.espresso">
-
-  <!-- For espresso testing purposes, this is removed in live builds, but not in dev builds -->
-  <uses-permission android:name="android.permission.SET_ANIMATION_SCALE" />
-
-  <!-- ... -->
-
-</manifest>
-```
-Than we modify the main test class to:
-
-```java
-public class MyInstrumentationTestCase extends ActivityInstrumentationTestCase2<MyActivity> {
-
-    private SystemAnimations systemAnimations;
-
-    public MyInstrumentationTestCase() {
-        super(MyActivity.class);
-    }
-
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
-        systemAnimations = new SystemAnimations(getInstrumentation().getContext());
-        systemAnimations.disableAll();
-        getActivity();
-    }
-
-    @Override
-    protected void tearDown() throws Exception {
-        super.tearDown();
-        systemAnimations.enableAll();
-    }
-}
-
-class SystemAnimations {
-
-    private static final String ANIMATION_PERMISSION = "android.permission.SET_ANIMATION_SCALE";
-    private static final float DISABLED = 0.0f;
-    private static final float DEFAULT = 1.0f;
-
-    private final Context context;
-
-    SystemAnimations(Context context) {
-        this.context = context;
-    }
-
-    void disableAll() {
-        int permStatus = context.checkCallingOrSelfPermission(ANIMATION_PERMISSION);
-        if (permStatus == PackageManager.PERMISSION_GRANTED) {
-            setSystemAnimationsScale(DISABLED);
-        }
-    }
-
-    void enableAll() {
-        int permStatus = context.checkCallingOrSelfPermission(ANIMATION_PERMISSION);
-        if (permStatus == PackageManager.PERMISSION_GRANTED) {
-            setSystemAnimationsScale(DEFAULT);
-        }
-    }
-
-    private void setSystemAnimationsScale(float animationScale) {
-        try {
-            Class<?> windowManagerStubClazz = Class.forName("android.view.IWindowManager$Stub");
-            Method asInterface = windowManagerStubClazz.getDeclaredMethod("asInterface", IBinder.class);
-            Class<?> serviceManagerClazz = Class.forName("android.os.ServiceManager");
-            Method getService = serviceManagerClazz.getDeclaredMethod("getService", String.class);
-            Class<?> windowManagerClazz = Class.forName("android.view.IWindowManager");
-            Method setAnimationScales = windowManagerClazz.getDeclaredMethod("setAnimationScales", float[].class);
-            Method getAnimationScales = windowManagerClazz.getDeclaredMethod("getAnimationScales");
-
-            IBinder windowManagerBinder = (IBinder) getService.invoke(null, "window");
-            Object windowManagerObj = asInterface.invoke(null, windowManagerBinder);
-            float[] currentScales = (float[]) getAnimationScales.invoke(windowManagerObj);
-            for (int i = 0; i < currentScales.length; i++) {
-                currentScales[i] = animationScale;
-            }
-            setAnimationScales.invoke(windowManagerObj, new Object[]{currentScales});
-        } catch (Exception e) {
-            Log.e("SystemAnimations", "Could not change animation scale to " + animationScale + " :'(");
-        }
-    }
-}
-```
-
-Now the gradle tasks, this the no productFlavor version..modify if you have productFlavors:
-
-
-espressstuffappmodule.gradle
-
-```gradle
-task grantAnimationPermission(type: Exec, dependsOn: 'installDevDebug') {
-  commandLine "adb shell pm grant $android.defaultConfig.applicationId android.permission.SET_ANIMATION_SCALE".split(' ')
-}
-
-tasks.whenTaskAdded { task ->
-    if (task.name.startsWith('connectedAndroidTest')) {
-        task.dependsOn grantAnimationPermission
-    }
-}
-
-def copyAndReplaceText(source, dest, Closure replaceText) {
-    dest.write(replaceText(source.text))
-}
-
-android.applicationVariants.all { variant ->
-    if (variant.name.startsWith('debug')) {
+  //espresso set up stuff
+  if (variant.name.startsWith('debug')) {
         System.out.println("Not removing the SET_ANIMATION_SCALE permission for $variant.name")
         return
     }
@@ -733,453 +790,92 @@ android.applicationVariants.all { variant ->
             replaced
         }
     }
-}
-```
-
-Yes, it is a pain the ass.
-
-##Jacoco Coverage
-
-In app module build file in the android block:
-
-```gradle
-debug {
-            testCoverageEnabled true
-        }
-```
-
-than from terminal:
-
-```gradle
-gradlew createDebugCoverageReport
-```
-
-the report will be in build/reports/coverage/buildType
-
-##BuildConfigField
-
-So let's standardize the fields we set and probably we should put the def blaock at the top of the buildTypes block:
-
-```gradle
-def STRING = "String"
-def gitshaString = "GIT_SHA"
-def gitSha = 'git rev-parse --short HEAD'.execute([], project.rootDir).text.trim()
-def gitShaValue = "\"${gitSha}\""
-def buildTimeStampString = "Build_TIME_STAMP"
-def buildTimeStampValue = "\"${buildTime}\""
-
-def BOOLEAN = "boolean"
-def TRUE = "true"
-def FALSE = "false"
-def LOG_HTTP_REQUESTS = "LOG_HTTP_REQUESTS"
-def REPORT_CRASHES = "REPORT_CRASHES"
-def ENABLE_VIEW_SERVER = "ENABLE_VIEW_SERVER"
-def ENABLE_SHARING = "ENABLE_SHARING"
-def DEBUG_IMAGES = "DEBUG_IMAGES"
-
-```
-
-Than the in debug buildType block we have:
-
-```gradle
-buildConfigField STRING, gitshaString, gitShaValue
-buildConfigField STRING, buildTimeStampString, buildTimeStampValue
-buildConfigField BOOLEAN, LOG_HTTP_REQUESTS, TRUE
-buildConfigField BOOLEAN, REPORT_CRASHES, FALSE
-buildConfigField BOOLEAN, ENABLE_VIEW_SERVER, TRUE
-buildConfigField BOOLEAN, ENABLE_SHARING, TRUE
-buildConfigField BOOLEAN, DEBUG_IMAGES, TRUE
-
-
-```
-
-Than in  the release buildType block we have:
-
-```gradle
-buildConfigField STRING, gitshaString, gitShaValue
-buildConfigField STRING, buildTimeStampString, buildTimeStampValue
-buildConfigField BOOLEAN, LOG_HTTP_REQUESTS, FALSE
-buildConfigField BOOLEAN, REPORT_CRASHES, TRUE
-buildConfigField BOOLEAN, ENABLE_VIEW_SERVER, FALSE
-buildConfigField BOOLEAN, ENABLE_SHARING, FALSE
-buildConfigField BOOLEAN, DEBUG_IMAGES, FALSE
-
-```
-
-##AaptOption
-
-```gradle
-aaptOptions {
-        noCompress 'txt'
-        ignoreAssetsPattern "!.svn:!.git:!.ds_store:!*.scc:.*:<dir>_*:!CVS:!thumbs.db:!picasa.ini:!*~"
-    }
-
-```
-
-##SigningConfigs
-
-```gradle
-signingConfigs {
-
-        release {
-            //props stored in gradle.properties at userhome .gradle subfolder
-
-            storeFile file(FREDGROTT_RELEASE_STORE_FILE)
-            storePassword FREDGROTT_RELEASE_STORE_PASSWORD
-            keyAlias FREDGROTT_RELEASE_KEY_ALIAS
-            keyPassword FREDGROTT_RELEASE_KEY_PASSWORD
-        }
-
-    }
-
-```
-
-The gradle.properties file at userhome .gradle:
-
-
-```gradle
-
-
-```
-
-##CompileOptions
-
-```gradle
-/*
-    Enables diamond operator, multi-catch, strings in switches for our
-    minSdkVersion to compileSdkVersion range.
-     */
-    compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_7
-        targetCompatibility JavaVersion.VERSION_1_7
-    }
-
-```
-
-##BuildTypes Debug
-
-Our settings:
-
-```gradle
-debuggable true
-minifyEnabled false
-// dagger jacaco conflict issue is resolved, dx change after buildtoolsversion 21
-testCoverageEnabled true
-
-// here we go, versionNameSuffix with build date!
-applicationIdSuffix '.dev'
-versionNameSuffix '-dev-'
-
-```
-
-##BuildTypes Release
-
-Our settings:
-
-```gradle
-minifyEnabled true
-proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro',  'proguard-butterknife.txt', 'proguard-daggertwo.txt', 'proguard.project.txt'
-applicationIdSuffix '.release'
-versionNameSuffix '-release-'
-signingConfig signingConfigs.release
-```
-
-##LintOptions
-
-```gradle
-lintOptions {
-        lintConfig file("my-custom-lint.xml")
-
-        // set to true to turn off analysis progress reporting by lint
-        quiet false
-        // if true, stop the gradle build if errors are found
-        abortOnError false
-        // if true, only report errors
-        ignoreWarnings true
-        // if true, emit full/absolute paths to files with errors (true by default)
-        //absolutePaths true
-        // if true, check all issues, including those that are off by default
-        checkAllWarnings true
-        // if true, treat all warnings as errors
-        warningsAsErrors true
-        // turn off checking the given issue id's
-        //disable 'TypographyFractions', 'TypographyQuotes'
-        // turn on the given issue id's
-        //enable 'RtlHardcoded', 'RtlCompat', 'RtlEnabled'
-        // check *only* the given issue id's
-        check 'NewApi', 'InlinedApi'
-        // if true, don't include source code lines in the error output
-        noLines false
-        // if true, show all locations for an error, do not truncate lists, etc.
-        showAll true
-
-        // if true, generate a text report of issues (false by default)
-        textReport true
-        // location to write the output; can be a file or 'stdout'
-        textOutput 'stdout'
-        // if true, generate an XML report for use by for example Jenkins
-        xmlReport true
-        // file to write report to (if not specified, defaults to lint-results.xml)
-        xmlOutput file("${rootProject.ext.lintReportsDir}/lint-report.xml")
-        // if true, generate an HTML report (with issue explanations, sourcecode, etc)
-        htmlReport true
-        // optional path to report (default will be lint-results.html in the builddir)
-        htmlOutput file("${rootProject.ext.lintReportsDir}/lint-report.html")
-
-        // set to true to have all release builds run lint on issues with severity=fatal
-        // and abort the build (controlled by abortOnError above) if fatal issues are found
-        checkReleaseBuilds true
-        // Set the severity of the given issues to fatal (which means they will be
-        // checked during release builds (even if the lint target is not included)
-        //fatal 'NewApi', 'InlineApi'
-        // Set the severity of the given issues to error
-        //error 'Wakelock', 'TextViewEdits'
-        // Set the severity of the given issues to warning
-        //warning 'ResourceAsColor'
-        // Set the severity of the given issues to ignore (same as disabling the check)
-        //ignore 'TypographyQuotes'
-
-
-    }
-
-```
-##Spoon Settings
-
-```gradle
-spoon {
-    // devices = ['333236E9AE5800EC']
-    debug = true
-    //className = 'fully.qualified.TestCase'
-
-    //methodName = 'testMyApp'
-
-    baseOutputDir = file("$buildDir/spoon")
-    // Enable setting test class/method-to-be-run from command line. E.g.:
-  // $> ../gradlew spoonFreeDebugTest -PspoonClassName=com.stanfy.spoon.example.test.MainActivityTest -PspoonMethodName=testSetText
-  if (project.hasProperty('spoonClassName')) {
-    className = project.spoonClassName
-
-    if (project.hasProperty('spoonMethodName')) {
-      methodName = project.spoonMethodName
-    }
-  }
-
-}
-
-```
-
-##Copy Apk To Artifacts
-
-We want to have the apk of the release build copied to the artifacts subfolder
-as we provide it to stakeholders as proof of milestone.
-
-
-
-```gradle
-def releasePath = file("${rootDir}/archive/${project.name}")
-
-def releaseTask = tasks.create(name: 'release') {
-    group 'Build'
-    description "Assembles and archives all Release builds"
-}
-
-android.applicationVariants.all { variant ->
+    //archive
     if (variant.buildType.name == 'release') {
-        def build = variant.name.capitalize()
+         def build = variant.name.capitalize()
 
-        def releaseBuildTask = tasks.create(name: "release${build}", type: Zip) {
-            group 'Build'
-            description "Assembles and archives apk and its proguard mapping for the $build build"
-            destinationDir releasePath
-            baseName variant.packageName
-            if (!variant.buildType.packageNameSuffix) {
-                appendix variant.buildType.name
-            }
-            if (variant.versionName) {
-                version "${variant.versionName}_${variant.versionCode}"
-            } else {
-                version "$variant.versionCode"
-            }
-            def archiveBaseName = archiveName.replaceFirst(/\.${extension}$/, '')
-            from(variant.outputFile.path) {
-                rename '.*', "${archiveBaseName}.apk"
-            }
-            if (variant.buildType.runProguard) {
-                from(variant.processResources.proguardOutputFile.parent) {
-                    include 'mapping.txt'
-                    rename '(.*)', "${archiveBaseName}-proguard_\$1"
-                }
-            }
-        }
-        releaseBuildTask.dependsOn variant.assemble
+         def releaseBuildTask = tasks.create(name: "release${build}", type: Zip) {
+             group 'Build'
+             description "Assembles and archives apk and its proguard mapping for the $build build"
+             destinationDir releasePath
+             baseName variant.packageName
+             if (!variant.buildType.packageNameSuffix) {
+                 appendix variant.buildType.name
+             }
+             if (variant.versionName) {
+                 version "${variant.versionName}_${variant.versionCode}"
+             } else {
+                 version "$variant.versionCode"
+             }
+             def archiveBaseName = archiveName.replaceFirst(/\.${extension}$/, '')
+             from(variant.outputFile.path) {
+                 rename '.*', "${archiveBaseName}.apk"
+             }
+             if (variant.buildType.runProguard) {
+                 from(variant.processResources.proguardOutputFile.parent) {
+                     include 'mapping.txt'
+                     rename '(.*)', "${archiveBaseName}-proguard_\$1"
+                 }
+             }
+         }
+         releaseBuildTask.dependsOn variant.assemble
 
-        variant.productFlavors.each { flavor ->
-            def flavorName = flavor.name.capitalize()
-            def releaseFlavorTaskName = "release${flavorName}"
-            def releaseFlavorTask
-            if (tasks.findByName(releaseFlavorTaskName)) {
-                releaseFlavorTask = tasks[releaseFlavorTaskName]
-            } else {
-                releaseFlavorTask = tasks.create(name: releaseFlavorTaskName) {
-                    group 'Build'
-                    description "Assembles and archives all Release builds for flavor $flavorName"
-                }
-                releaseTask.dependsOn releaseFlavorTask
-            }
-            releaseFlavorTask.dependsOn releaseBuildTask
-        }
+         variant.productFlavors.each { flavor ->
+             def flavorName = flavor.name.capitalize()
+             def releaseFlavorTaskName = "release${flavorName}"
+             def releaseFlavorTask
+             if (tasks.findByName(releaseFlavorTaskName)) {
+                 releaseFlavorTask = tasks[releaseFlavorTaskName]
+             } else {
+                 releaseFlavorTask = tasks.create(name: releaseFlavorTaskName) {
+                     group 'Build'
+                     description "Assembles and archives all Release builds for flavor $flavorName"
+                 }
+                 releaseTask.dependsOn releaseFlavorTask
+             }
+             releaseFlavorTask.dependsOn releaseBuildTask
+         }
+     }
+
+
+}
+
+//dep resolution strategies, sometimes we have to force things if Google or others
+//did not update a library correctly with one of the dependencies so
+//we have a block where we handle such things
+configurations.all {
+    // Currently espresso is dependent on support-annotations:22.2.0
+    //it assumes that we do have a dep entry for support-annotations 22.2.1
+    resolutionStrategy.force 'com.android.support:support-annotations:22.2.1'
+}
+
+
+
+
+
+//espresso set up stuff
+task grantAnimationPermission(type: Exec, dependsOn: 'installDevDebug') {
+  commandLine "adb shell pm grant $android.defaultConfig.applicationId android.permission.SET_ANIMATION_SCALE".split(' ')
+}
+
+tasks.whenTaskAdded { task ->
+    if (task.name.startsWith('connectedAndroidTest')) {
+        task.dependsOn grantAnimationPermission
     }
 }
+
+def copyAndReplaceText(source, dest, Closure replaceText) {
+    dest.write(replaceText(source.text))
+}
+
+
+
 ```
 
+##Library Module Non Product Flavors Build File
 
-
-
-
-
-
-
-
-##DefaultConfig For testing
-
-testApplicationId defaults to applicationId + ".test"  should never need to
-set it to something else. testPackageName is left never declared in the sample
-app under test in Google's Espresso examples. Thus, should be okay not to
-declare unless we have something real custom.
-
+It's similar to the Application Module with just a few changes:
 
 ```gradle
 
-testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
-testHandleProfiling true
-testFunctionalTest true
-```
-
-It is the same for library projects as well.
-
-##Codeqa
-
-The general idea is I do not tie these to the assembleDebug unless the CI
-server is the one doing the build as I can always instruct AndroiidStudio to save a command shortcut that assembleDebug and executes the codeqa stuff. The Google Android plugin still does not due a standard java plugin integration, the gradle codeqa plugins run but its not tied into the Google Android report merging, etc.
-
-To merge the reports I have to execute ant tasks and do an xslt style merge.
-
-
-
-
-
-javancsscodeqanonproductflavor.gradle
-
-```gradle
-// Configure JavaNCSS
-
-configurations {
-  javancss
-}
-
-dependencies {
-  // v32.53
-  javancss 'org.codehaus.javancss:javancss:32.53'
-}
-
-task javancss() {
-  description = 'execute JavaNCSS tool on project source code'
-  group = 'Code Quality'
-
-  def ignoreFailures = true
-
-  // create output folders
-  def javancssReportDir = file("$project.buildDir/reports/javancss")
-  javancssReportDir.mkdirs()
-
-  // exclude auto-generated code and 3rd party libs
-  def exclude = ['**/build/generated/**', '**/build/source/**',
-                 '**/com/android/**', '**/com/google/**', '**/android/support/**']
-
-  ant {
-    taskdef name: 'javancss',
-            classname: 'javancss.JavancssAntTask',
-            classpath: configurations.javancss.asPath
-
-    javancss srcdir: 'src',
-            packageMetrics: "yes",
-            excludes: exclude,
-            classMetrics: "yes",
-            functionMetrics: "yes",
-            abortOnFail: !ignoreFailures,
-            generateReport: true,
-            outputfile: "$javancssReportDir/javancss.xml",
-            format: 'xml'
-  }
-}
-```
-
-checkstylenonproductflavors.gradle
-
-```gradle
-apply plugin: 'checkstyle'
-
-configurations {
-  checkstyle
-}
-
-dependencies{
-  checkstyle ''
-}
-
-task checkstyle(type: Checkstyle){
-  source 'src'
-  include '**/*.java'
-  exclude '**/gen/**'
-  // empty classpath
-  classpath = files()
-  //Do not fail build
-}
-```
-
-pmdnonproductflavors.gradle
-
-```gradle
-apply plugin: 'pmd'
-
-configurations{
-  pmd
-}
-
-dependencies{
-  pmd ''
-}
-
-task pmd(type: Pmd){
-  source 'src'
-  include '**/*.java'
-  exclude '**/gen/**'
-  ruleSets = ["android"]
-}
-```
-
-findbugsnonproductflavors.gradle
-
-```gradle
-apply plugin: 'findbugs'
-
-configurations{
-  findbugs
-}
-
-dependencies{
-  findbugs ''
-}
-
-task findbugs(type: FindBugs){
-  ignoreFailures = true
-  classes = fileTree('build/intermediates/classes/debug')
-  source = fileTree('src/main/java')
-  classpath = files()
-  effort = 'max'
-}
-
-tasks.withType(findBugs) {
-  excludeFilter = file("config/findbugs/excludeFilter.xml")
-}
 ```

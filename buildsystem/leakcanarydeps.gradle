@@ -1,5 +1,0 @@
-ext{
-  leakCanary 'com.squareup.leakcanary:leakcanary-android:1.3'
-  leakCanaryNOOP 'com.squareup.leakcanary:leakcanary-android-no-op:1.3'
-
-}

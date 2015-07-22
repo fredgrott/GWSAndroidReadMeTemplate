@@ -131,38 +131,10 @@ application development has become an expert field with release of hundreds of a
 every year to figure out how to support and back-port on the android platform. I find
 that obsessing about the UX android user experience and being an android device advocate puts me in an unique position.
 
-Among all those firms that want an android developer to accept an iOS UX design bias
-I am somewhat a unique Unicorn in that I use the time wrestled away from 2-3 hour
-round-trip commutes to obsess about how to port that new api thing back to older
-devices to get that UX-UI wow factor that android device users gravitate towards.
-I am somewhat focused on rejecting the IT-Body-Shop way of developing software.
-There is nothing more boring than an inflexible piece of software and software users
-who hate using that software and entrenched stake-holders who are not accountable to the end users.
+I happen to be a computer language and math polyglot that enjoys coding and math and
+is somewhat focused on the joy of developing and designing android applications. I enjoy organizing fragmented data-sets into an android application that transforms a particular mobile activity of the end user into something enjoyable.
 
-I know how to get the maximum amount of code and the maximum amount of working milestones and that is by controlling my environment in which I code.  That means
-I reduce commuting time from 2-3 hours round-trip to almost zero and I reduce
-time spent in meetings to almost zero and reduce communication access to only
-involve a few stake-holders. Micor-managing does not exist in that if you have to micro-manage a developer than you have made the wrong choice in choosing a developer.
-
-With that saved time I have develop some unique processes that integrate with the
-Android Platform and Development Ecosystem so that I can obtain specific information
-required to make android native java application development smoother.Some of those processes allow me to develop my own OEM-device bug databases that not only contain details of the device-specific bugs but also specific software development work-arounds that solve that particular bug-problem. There is a simple analtyic pattern involved. Examine the data and organize said data to determine what problems
-are evident. And than come up with solutions that integrate will within the subsystems I am working in.
-
-It's a different way of doing things than the usual government style way of developing. That Trillion-Dollar F-35 will never see service with the military.
-All because some of the stake-holders choose to make something palatable to Congress
-in terms of spending while ignoring the middle-level people stating that it was not
-viable as a solution. In software development we call it the thermocline-of-truth.
-I am a rebel in that I insist on having direct lines of communication to the one's
-writing the software development check to prevent ignorance of the thermocline-of-truth as far as the progress of software development and what features are working and which features are not working.
-
-If you are a tech co-founder of a Chicago start-up and need to find an android developer, you may want to give some consideration to what I have stated above as
-I am picky about what software development situations that I want to be in despite
-the hundreds-of-thousands-of-dollars involved. Obviously, if you are uncomfortable
-with what I have stated above as what I ask for than I am not a fit  for your
-immediate android native java application needs.
-
-Usually, I request a subway-paid-meal meeting at my location to determine if I want to pick your software development gig opportunity as my next focus. The contract is usually dirt-simple in that an advance is given and succeeding payments are made on a weekly basis triggered by the weekly working milestones that you receive.
+That also means that I strive to obtain the maximum effective coding and design environment and have found that is not the corporate work environment but a 1099 remote-working consulting arrangement for funded start-ups. I have found that the best fit is when the start-up tech co-founder inquires if I would like to design and develop their android application.
 
 
 You can contact me at firstname dot lastname at gmail dot com.

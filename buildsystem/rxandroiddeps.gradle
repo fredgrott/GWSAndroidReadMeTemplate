@@ -1,4 +1,0 @@
-ext{
-  rxAndroid 'io.reactivex:rxandroid:0.24.0'
-  rxKotlin 'io.reactivex:rxkotlin:0.21.0'
-}
