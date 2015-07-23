@@ -392,7 +392,68 @@ advancedVersioning {
 def appVersionName = advancedVersioning.versionName
 def int appVersionCode = advancedVersioning.versionCode
 
-
+// After looking at Google Android Gradle Plugin source and
+// Gradle 2.4 source the sourceSets we have for a
+// dagger app module project are:
+//
+// sourceSets.main.java
+// sourceSets.debug.java
+// sourceSets.release.java
+// sourceSets.test.java   unit tests
+// sourceSets.androidTest.java android unit tests
+//
+// Thus codeqa gradle plugins tasks should work and be
+//     CheckstyleMain
+//     CheckstyleTest
+//     CheckstyleAndroidTest
+//     CheckstyleDebug
+//     CheckstyleRelease
+//
+//   ie we set up tasks for the sourceSets of interest
+//
+//   simplest test would be
+//
+//   sourceSets.all { sourceSet ->
+//        def name = sourceSet.name
+//        println '${name}'
+//
+//}
+//
+//  that should give the output of
+//       main
+//       androidTest
+//       debug
+//       release
+//       test
+//
+// if only main and androidTest are setup than the
+//output should be main and androidTest
+//Well my test app does not print the names not even after the corrections
+//so we have to fake it I guess as far as sourceSets.
+//
+// That means that the codeqa tasks have to use ant and we still do
+// codeqa tasks by codeqaNameSourceSetName naming conventions.
+//
+//sourceSets {
+//  
+//   debug {
+//        java {
+//           srcDir 'src/java'
+//        }
+//        resources {
+//            srcDir 'src/resources'
+//        }
+//   }
+//
+//   release {
+//       java {
+//         srcDir 'src/java'
+//       }
+//       resources {
+//         srcDir 'src/resources'
+//       }
+//   }
+//}
 
 
 
@@ -688,14 +749,23 @@ dependencies {
     //we did something similar for the lombok.jar that was needed just for the
     //ant task to delombok things for the javadoc task as we should not load it in
     //libs as it adds stuff that will generate errors.
-    codeqa fileTree(dir: '${rootProject}/config/classycle/lib', include: ['*.jar'])
+
     codeqa globalConfiguration.findbugs
-    codeqa globalConfiguration.javancss
+    codeqa globalConfiguration.checkstyle
     codeqa globalConfiguration.jdepend
-    codeqa globalConfiguration.jdependAnt
     codeqa globalConfiguration.pmdJava
 
 }
+
+//Our codeqa assumptions are:
+// Anddroid Gradle Plugin still not fully compatible with
+// Gradle source setts so CodeQANameSourceSetName tasks are
+// not automatically triggered so we have to manually state
+// what they are and the checkSourceSetName task that they
+// should be triggered by
+// and if than wrap them chekcing if we are PreDexing PreDexing false
+// is the trigger codeqa condition
+
 
 //so if we do the commandline as part of CI server execution or
 //in our AS terminal:
