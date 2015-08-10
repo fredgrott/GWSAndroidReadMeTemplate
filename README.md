@@ -1,5 +1,5 @@
 # GWSAndroidReadMeTemplate
-![ReadMe Template cartoon](/art/readmetemplatecartoon.png)
+![ReadMe Template cartoon](/readme_assets/art/readmetemplatecartoon.png)
 
 # TOC
 
@@ -44,9 +44,6 @@ Want the power that comes with more people reading your readme?
 
 Fork, this repo and re-use my template..
 
-## Aims
-
-## Benefits
 
 
 
@@ -80,7 +77,7 @@ application**
 
 ##ChangeLog
 
-[Full ChangeLog List](https://github.com/shareme/GWSAndroidReadMeTemplate/changelog/)
+[Full ChangeLog List](https://github.com/shareme/GWSAndroidReadMeTemplate/project_artifacts/changelog/)
 
 
 
@@ -106,7 +103,7 @@ Helpful resources for both the beginner and intermediate android developer.
 
 ###Articles
 
-[Articles](https://github.com/shareme/GWSAndroidReadMeTemplate/artilces/)
+
 
 ###Developer Sites
 
@@ -116,20 +113,24 @@ Helpful resources for both the beginner and intermediate android developer.
 
 [Google Android Developer Blog](http://android-developers.blogspot.com/)
 
-[Full Developer Sites Listing](https://github.com/shareme/GWSAndroidReadMeTemplate/devsites/)
+[Full Developer Sites Listing](https://github.com/shareme/GWSAndroidReadMeTemplate/readme_assets/devsites/)
 
 
 
 ##About Fred Grott and GrottWorkShop
 
-![GWS Logo](/art/gws_logo_longform_final.png)
+![GWS Logo](/readme-assets/art/gws_logo_longform_final.png)
 
 **describe Fred Grott dev/design processes and GWS**
+
+Experienced in back-ends such as JavaEE/Spring/Hibernate/Grails, Python-Django, and PHP-Cake along with LAMP. Start-up experienced with an Agile development outlook and
+mobile experience including JavaME and JavaTV. In the top 17% of developers at
+StackOverflow in answering android developer questions. Also my tech articles have been features in some places that you might recognize such as IBM's DeveloperWorks.
 
 It has become somewhat the unique leading the innovations in that mobile native
 application development has become an expert field with release of hundreds of apis
 every year to figure out how to support and back-port on the android platform. I find
-that obsessing about the UX android user experience and being an android device advocate puts me in an unique position.
+that obsessing about the UX android user experience and being an android device advocate puts me in an unique position to solve those impossible problems that crop up when you form a new start-up that is creating new horizons.
 
 I happen to be a computer language and math polyglot that enjoys coding and math and
 is somewhat focused on the joy of developing and designing android applications. I enjoy organizing fragmented data-sets into an android application that transforms a particular mobile activity of the end user into something enjoyable.
@@ -143,9 +144,9 @@ You can contact me at firstname dot lastname at gmail dot com.
 
 
 
-[![FaceBook profile](/art/fb80x80.png)](http://www.facebook.com/fredgrott)[![GooglePlus profile](/art/googleplus80x80.png)](https://plus.google.com/u/0/+FredGrott/about)[![LinkedIN profile](/art/linkedin80x80.png)](http://www.linkedin.com/in/shareme/en)[![Twitter profile](/art/twitter80x80.png)](https://twitter.com/fredgrott)[![Xing profile](/art/xing80x80.png)](https://www.xing.com/profile/Fred_Grott?sc_o=mxb_p)
+[![FaceBook profile](/readme_assets/art/fb80x80.png)](http://www.facebook.com/fredgrott)[![GooglePlus profile](/readme_assets/art/googleplus80x80.png)](https://plus.google.com/u/0/+FredGrott/about)[![LinkedIN profile](/readme_assets/art/linkedin80x80.png)](http://www.linkedin.com/in/shareme/en)[![Twitter profile](/readme_assets/art/twitter80x80.png)](https://twitter.com/fredgrott)[![Xing profile](/readme_assets/art/xing80x80.png)](https://www.xing.com/profile/Fred_Grott?sc_o=mxb_p)
 
-[Fred Grott GWS Social Profiles Full List](https://github.com/shareme/GWSAndroidReadMeTemplate/sociallist/)
+[Fred Grott GWS Social Profiles Full List](https://github.com/shareme/GWSAndroidReadMeTemplate/readme_assets/sociallist/)
 
 ##License
 Copyright (c) 2015 Fred Grott(GrottWorkShop)
